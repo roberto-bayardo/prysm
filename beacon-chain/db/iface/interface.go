@@ -30,9 +30,9 @@ type ReadOnlyDatabase interface {
 	IsFinalizedBlock(ctx context.Context, blockRoot [32]byte) bool
 	FinalizedChildBlock(ctx context.Context, blockRoot [32]byte) (block.SignedBeaconBlock, error)
 	HighestSlotBlocksBelow(ctx context.Context, slot types.Slot) ([]block.SignedBeaconBlock, error)
-	ValidatedTips(ctx context.Context) (map[[32]byte]types.Slot, error)
 	// Blobs related methods.
 	BlobsSidecar(ctx context.Context, blockRoot [32]byte) (*ethpb.BlobsSidecar, error)
+	BlobsSidecarsBySlot(ctx context.Context, slot types.Slot) (bool, []*ethpb.BlobsSidecar, error)
 	// State related methods.
 	State(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error)
 	StateOrError(ctx context.Context, blockRoot [32]byte) (state.BeaconState, error)
@@ -68,7 +68,6 @@ type NoHeadAccessDatabase interface {
 	SaveBlock(ctx context.Context, block block.SignedBeaconBlock) error
 	SaveBlocks(ctx context.Context, blocks []block.SignedBeaconBlock) error
 	SaveGenesisBlockRoot(ctx context.Context, blockRoot [32]byte) error
-	UpdateValidatedTips(ctx context.Context, newVals map[[32]byte]types.Slot) error
 	// Blob related methods.
 	SaveBlobsSidecar(ctx context.Context, blob *ethpb.BlobsSidecar) error
 	// State related methods.

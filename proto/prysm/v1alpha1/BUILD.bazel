@@ -110,6 +110,9 @@ ssz_gen_marshal(
         "BeaconBlockAndBlobs",
         "SignedBeaconBlockAndBlobs",
         "Blob",
+        "BlobsSidecar",
+        "SignedBlobsSidecar",
+        "BlobsSidecarsByRangeRequest",
     ],
 )
 
