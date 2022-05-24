@@ -5,11 +5,11 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	types "github.com/prysmaticlabs/eth2-types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/time"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/config/params"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/monitoring/tracing"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1/attestation"
@@ -183,7 +183,7 @@ func UpdateBalance(vp []*Validator, bBal *Balance, stateVersion int) *Balance {
 			if stateVersion == version.Phase0 && v.IsPrevEpochAttester {
 				bBal.PrevEpochAttested += v.CurrentEpochEffectiveBalance
 			}
-			if (stateVersion == version.Altair || stateVersion == version.Bellatrix || stateVersion == version.EIP4844) && v.IsPrevEpochSourceAttester {
+			if (stateVersion == version.Altair || stateVersion == version.Bellatrix || stateVersion == version.Eip4844) && v.IsPrevEpochSourceAttester {
 				bBal.PrevEpochAttested += v.CurrentEpochEffectiveBalance
 			}
 			if v.IsPrevEpochTargetAttester {

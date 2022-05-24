@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	types "github.com/prysmaticlabs/eth2-types"
+	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	bolt "go.etcd.io/bbolt"
@@ -47,7 +47,7 @@ func (s *Store) BlobsSidecar(ctx context.Context, blockRoot [32]byte) (*ethpb.Bl
 }
 
 func (s *Store) BlobsSidecarsBySlot(ctx context.Context, slot types.Slot) (bool, []*ethpb.BlobsSidecar, error) {
-	ctx, span := trace.StartSpan(ctx, "BeaconDB.BlobsBySlot")
+	ctx, span := trace.StartSpan(ctx, "BeaconDB.BlobsSidecarsBySlot")
 	defer span.End()
 
 	var blobsSidecars []*ethpb.BlobsSidecar
