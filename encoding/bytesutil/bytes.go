@@ -141,6 +141,16 @@ func ToBool(x byte) bool {
 	return x&1 == 1
 }
 
+// ToBytes48Array is a convenience method for converting an array of
+// fixed-size byte arrays to an array of byte slices.
+func ToBytes48Array(x [][]byte) [][48]byte {
+	y := make([][48]byte, len(x))
+	for i := range x {
+		y[i] = ToBytes48(x[i])
+	}
+	return y
+}
+
 // FromBytes2 returns an integer which is stored in the little-endian format(2, 'little')
 // from a byte array.
 func FromBytes2(x []byte) uint16 {
