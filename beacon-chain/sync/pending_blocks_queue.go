@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/pkg/errors"
 	"github.com/prysmaticlabs/prysm/async"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
@@ -204,9 +205,18 @@ func (s *Service) processPendingBlocks(ctx context.Context) error {
 			default:
 			}
 
-			// NOTE: Sidecars in the pending queue were already network-validated. All that's left is to verify it against the block
 			var sidecar *ethpb.BlobsSidecar
 			if queuedSidecar != nil {
+				// Only for gossiped sidecars that skipped validation
+				if queuedSidecar.sig != nil && !queuedSidecar.validated {
+					res, err := s.validateBlobsSidecarSignature(ctx, b, queuedSidecar.AsSignedBlobsSidecar())
+					if err != nil || res != pubsub.ValidationAccept {
+						tracing.AnnotateError(span, err)
+						span.End()
+						continue
+					}
+				}
+
 				sidecar = queuedSidecar.s
 				kzgs, err := b.Block().Body().BlobKzgs()
 				// an error shouldn't happen! A non-nil sidecar means we're dealing with a EIP-4844 block

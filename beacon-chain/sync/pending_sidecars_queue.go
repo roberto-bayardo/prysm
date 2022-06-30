@@ -14,8 +14,9 @@ const maxSidecarsPerSlot = maxBlocksPerSlot
 
 // represents a possibly signed BlobsSidecar
 type queuedBlobsSidecar struct {
-	s   *ethpb.BlobsSidecar
-	sig []byte
+	s         *ethpb.BlobsSidecar
+	sig       []byte
+	validated bool
 }
 
 func (s *queuedBlobsSidecar) IsSigned() bool {

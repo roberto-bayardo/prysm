@@ -20,7 +20,7 @@ func (s *Service) blobsSidecarSubscriber(ctx context.Context, msg proto.Message)
 
 	// Sidecars are handled by the block queue processing routine
 	s.pendingQueueLock.Lock()
-	s.insertSidecarToPendingQueue(&queuedBlobsSidecar{m.Message, m.Signature})
+	s.insertSidecarToPendingQueue(&queuedBlobsSidecar{m.Message, m.Signature, true})
 	s.pendingQueueLock.Unlock()
 	return nil
 }

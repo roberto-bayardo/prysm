@@ -31,7 +31,7 @@ import (
 // [REJECT] the beacon proposer signature, signed_blobs_sidecar.signature, is valid
 // [IGNORE] The sidecar is the first sidecar with valid signature received for the (proposer_index, sidecar.beacon_block_slot)
 // combination, where proposer_index is the validator index of the beacon block proposer of blobs_sidecar.beacon_block_slot
-func (s *Service) validateBlobsSidecar(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
+func (s *Service) validateBlobsSidecarPubSub(ctx context.Context, pid peer.ID, msg *pubsub.Message) (pubsub.ValidationResult, error) {
 	// Accept the sidecar if it came from itself.
 	if pid == s.cfg.p2p.PeerID() {
 		return pubsub.ValidationAccept, nil
@@ -99,7 +99,7 @@ func (s *Service) validateBlobsSidecar(ctx context.Context, pid peer.ID, msg *pu
 	if blk == nil {
 		// We expect the block including this sidecar to follow shortly. Add the sidecar the queue so the pending block processor can readily retrieve it
 		s.pendingQueueLock.Lock()
-		s.insertSidecarToPendingQueue(&queuedBlobsSidecar{signed.Message, signed.Signature})
+		s.insertSidecarToPendingQueue(&queuedBlobsSidecar{signed.Message, signed.Signature, false})
 		s.pendingQueueLock.Unlock()
 		return pubsub.ValidationIgnore, nil
 	}
@@ -108,7 +108,7 @@ func (s *Service) validateBlobsSidecar(ctx context.Context, pid peer.ID, msg *pu
 		return pubsub.ValidationIgnore, nil
 	}
 
-	validationResult, err := s.validateBlobsSidecarSignature(ctx, blk, signed)
+	validationResult, err := s.validateBlobsSidecar(ctx, blk, signed)
 	if err != nil {
 		tracing.AnnotateError(span, err)
 		return validationResult, err
@@ -128,6 +128,10 @@ func (s *Service) validateBlobsSidecar(ctx context.Context, pid peer.ID, msg *pu
 		"numBlobs":  len(signed.Message.Blobs),
 	}).Debug("Received sidecar")
 	return pubsub.ValidationAccept, nil
+}
+
+func (s *Service) validateBlobsSidecar(ctx context.Context, blk interfaces.SignedBeaconBlock, m *ethpb.SignedBlobsSidecar) (pubsub.ValidationResult, error) {
+	return s.validateBlobsSidecarSignature(ctx, blk, m)
 }
 
 func (s *Service) validateBlobsSidecarSignature(ctx context.Context, blk interfaces.SignedBeaconBlock, m *ethpb.SignedBlobsSidecar) (pubsub.ValidationResult, error) {
