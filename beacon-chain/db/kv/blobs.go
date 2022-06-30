@@ -56,7 +56,7 @@ func (s *Store) BlobsSidecar(ctx context.Context, blockRoot [32]byte) (*ethpb.Bl
 }
 
 // BlobsSidecar retrieves sidecars from a slot.
-func (s *Store) BlobsSidecarsBySlot(ctx context.Context, slot types.Slot) (bool, []*ethpb.BlobsSidecar, error) {
+func (s *Store) BlobsSidecarsBySlot(ctx context.Context, slot types.Slot) ([]*ethpb.BlobsSidecar, error) {
 	ctx, span := trace.StartSpan(ctx, "BeaconDB.BlobsSidecarsBySlot")
 	defer span.End()
 
@@ -82,10 +82,9 @@ func (s *Store) BlobsSidecarsBySlot(ctx context.Context, slot types.Slot) (bool,
 		return nil
 	})
 	if err != nil {
-		return false, nil, errors.Wrap(err, "could not retrieve blobs")
+		return nil, errors.Wrap(err, "could not retrieve blobs")
 	}
-
-	return true, blobsSidecars, nil
+	return blobsSidecars, nil
 }
 
 func (s *Store) HasBlobsSidecar(ctx context.Context, root [32]byte) bool {

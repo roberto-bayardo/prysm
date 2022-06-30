@@ -58,7 +58,7 @@ var (
 	errNoPeersWithAltBlocks  = errors.New("no peers with alternative blocks found")
 	errInvalidSidecar        = errors.New("sidecar verification failed")
 	errMissingSidecar        = errors.New("block recieved without sidecar")
-	errUnexpectedSidecar     = errors.New("receieved unexpected sidecar")
+	errUnexpectedSidecar     = errors.New("received unexpected sidecar")
 )
 
 // blocksFetcherConfig is a config to setup the block fetcher.

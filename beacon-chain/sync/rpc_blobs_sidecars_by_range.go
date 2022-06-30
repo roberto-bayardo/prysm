@@ -49,13 +49,13 @@ func (s *Service) blobsSidecarsByRangeRPCHandler(ctx context.Context, msg interf
 			return err
 		}
 
-		exists, sidecars, err := s.cfg.beaconDB.BlobsSidecarsBySlot(ctx, slot)
+		sidecars, err := s.cfg.beaconDB.BlobsSidecarsBySlot(ctx, slot)
 		if err != nil {
 			s.writeErrorResponseToStream(responseCodeServerError, p2ptypes.ErrGeneric.Error(), stream)
 			tracing.AnnotateError(span, err)
 			return err
 		}
-		if !exists {
+		if len(sidecars) == 0 {
 			continue
 		}
 
