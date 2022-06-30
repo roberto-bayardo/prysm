@@ -320,6 +320,12 @@ func (f *blocksFetcher) fetchBlocksFromPeer(
 				f.p2p.Peers().Scorers().BadResponsesScorer().Increment(peers[i])
 			}
 		}
+		log.WithFields(logrus.Fields{
+			"err":       err,
+			"startSlot": start,
+			"count":     count,
+			"peer":      peers[i],
+		}).Trace("Error getting data from peer")
 	}
 	return nil, nil, "", errNoPeersAvailable
 }

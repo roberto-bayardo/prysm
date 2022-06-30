@@ -330,6 +330,15 @@ func connectPeerHavingBlocks(
 		}
 	})
 
+	p.SetStreamHandler("/eth2/beacon_chain/req/blobs_sidecars_by_range/1/ssz_snappy", func(stream network.Stream) {
+		defer func() {
+			_err := stream.Close()
+			_ = _err
+		}()
+		req := new(ethpb.BlobsSidecarsByRangeRequest)
+		assert.NoError(t, p.Encoding().DecodeWithMaxLength(stream, req))
+	})
+
 	p.Connect(host)
 
 	finalizedEpoch := slots.ToEpoch(finalizedSlot)
