@@ -142,7 +142,7 @@ func ToBool(x byte) bool {
 }
 
 // ToBytes48Array is a convenience method for converting an array of
-// fixed-size byte arrays to an array of byte slices.
+// byte slices to an array of fixed-sized byte arrays.
 func ToBytes48Array(x [][]byte) [][48]byte {
 	y := make([][48]byte, len(x))
 	for i := range x {
