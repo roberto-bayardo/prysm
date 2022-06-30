@@ -9,6 +9,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/transition/interop"
 	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
+	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	ethpb "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
 	"google.golang.org/protobuf/proto"
 )
@@ -31,24 +32,26 @@ func (s *Service) beaconBlockSubscriber(ctx context.Context, msg proto.Message) 
 		return err
 	}
 
-	var sidecar *queuedBlobsSidecar
+	var sidecar *eth.BlobsSidecar
 	if blockRequiresSidecar(block) {
 		slot := block.Slot()
 		s.pendingQueueLock.RLock()
 		sidecars := s.pendingSidecarsInCache(slot)
 		s.pendingQueueLock.RUnlock()
 
-		sidecar = findSidecarForBlock(block, root, sidecars)
-		if sidecar == nil {
+		queuedSidecar := findSidecarForBlock(block, root, sidecars)
+		if queuedSidecar == nil {
 			// re-schedule block to be processed later.
 			// TODO(XXX): This is a bit inefficient as the block will be validated again
 			s.pendingQueueLock.Lock()
 			s.insertBlockToPendingQueue(slot, signed, root)
 			s.pendingQueueLock.Unlock()
+			return nil
 		}
+		sidecar = queuedSidecar.s
 	}
 
-	if err := s.cfg.chain.ReceiveBlock(ctx, signed, root, sidecar.s); err != nil {
+	if err := s.cfg.chain.ReceiveBlock(ctx, signed, root, sidecar); err != nil {
 		if blockchain.IsInvalidBlock(err) {
 			interop.WriteBlockToDisk(signed, true /*failed*/)
 			s.setBadBlock(ctx, root)
