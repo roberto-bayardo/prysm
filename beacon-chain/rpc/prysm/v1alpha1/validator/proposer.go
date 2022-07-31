@@ -65,6 +65,7 @@ func (vs *Server) GetBeaconBlock(ctx context.Context, req *ethpb.BlockRequest) (
 	if err := vs.optimisticStatus(ctx); err != nil {
 		return nil, err
 	}
+
 	blk, sideCar, err := vs.getEip4844BeaconBlock(ctx, req)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Could not fetch eip4844 beacon block: %v", err)
@@ -151,6 +152,11 @@ func (vs *Server) proposeGenericBeaconBlock(ctx context.Context, blk interfaces.
 		return nil, fmt.Errorf("could not tree hash block: %v", err)
 	}
 
+	blk, err = vs.unblindBuilderBlock(ctx, blk)
+	if err != nil {
+		return nil, err
+	}
+
 	// Do not block proposal critical path with debug logging or block feed updates.
 	defer func() {
 		log.WithField("blockRoot", fmt.Sprintf("%#x", bytesutil.Trunc(root[:]))).Debugf(
@@ -207,6 +213,15 @@ func (vs *Server) computeStateRoot(ctx context.Context, block interfaces.SignedB
 }
 
 // SubmitValidatorRegistration submits validator registrations.
-func (vs *Server) SubmitValidatorRegistration(context.Context, *ethpb.SignedValidatorRegistrationsV1) (*emptypb.Empty, error) {
+func (vs *Server) SubmitValidatorRegistration(ctx context.Context, reg *ethpb.SignedValidatorRegistrationsV1) (*emptypb.Empty, error) {
+	// No-op is the builder is nil / not configured. The node should still function without a builder.
+	if vs.BlockBuilder == nil || !vs.BlockBuilder.Configured() {
+		return &emptypb.Empty{}, nil
+	}
+
+	if err := vs.BlockBuilder.RegisterValidator(ctx, reg.Messages); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "Could not register block builder: %v", err)
+	}
+
 	return &emptypb.Empty{}, nil
 }

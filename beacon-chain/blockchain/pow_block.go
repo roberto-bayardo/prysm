@@ -66,7 +66,7 @@ func (s *Service) validateMergeBlock(ctx context.Context, b interfaces.SignedBea
 	if !valid {
 		err := fmt.Errorf("invalid TTD, configTTD: %s, currentTTD: %s, parentTTD: %s",
 			params.BeaconConfig().TerminalTotalDifficulty, mergeBlockTD, mergeBlockParentTD)
-		return invalidBlock{err}
+		return invalidBlock{error: err}
 	}
 
 	log.WithFields(logrus.Fields{
@@ -100,7 +100,7 @@ func (s *Service) getBlkParentHashAndTD(ctx context.Context, blkHash []byte) ([]
 	if overflows {
 		return nil, nil, errors.New("total difficulty overflows")
 	}
-	return blk.ParentHash, blkTDUint256, nil
+	return blk.ParentHash[:], blkTDUint256, nil
 }
 
 // validateTerminalBlockHash validates if the merge block is a valid terminal PoW block.

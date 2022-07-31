@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
 	mock "github.com/prysmaticlabs/prysm/beacon-chain/blockchain/testing"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache"
@@ -31,12 +32,12 @@ func startChainService(t testing.TB, st state.BeaconState, block interfaces.Sign
 	r, err := block.Block().HashTreeRoot()
 	require.NoError(t, err)
 	require.NoError(t, db.SaveGenesisBlockRoot(ctx, r))
-	require.NoError(t, db.SaveState(ctx, st, r))
+
 	cp := &ethpb.Checkpoint{
 		Epoch: coreTime.CurrentEpoch(st),
 		Root:  r[:],
 	}
-
+	require.NoError(t, db.SaveState(ctx, st, r))
 	require.NoError(t, db.SaveJustifiedCheckpoint(ctx, cp))
 	require.NoError(t, db.SaveFinalizedCheckpoint(ctx, cp))
 	attPool, err := attestations.NewService(ctx, &attestations.Config{
@@ -79,7 +80,7 @@ func (m *engineMock) NewPayload(context.Context, *pb.ExecutionPayload) ([]byte, 
 	return nil, nil
 }
 
-func (m *engineMock) LatestExecutionBlock(context.Context) (*pb.ExecutionBlock, error) {
+func (m *engineMock) LatestExecutionBlock() (*pb.ExecutionBlock, error) {
 	return nil, nil
 }
 
@@ -96,9 +97,11 @@ func (m *engineMock) ExecutionBlockByHash(_ context.Context, hash common.Hash) (
 	td := new(big.Int).SetBytes(bytesutil.ReverseByteOrder(b.TotalDifficulty))
 	tdHex := hexutil.EncodeBig(td)
 	return &pb.ExecutionBlock{
-		ParentHash:      b.ParentHash,
+		Header: gethtypes.Header{
+			ParentHash: common.BytesToHash(b.ParentHash),
+		},
 		TotalDifficulty: tdHex,
-		Hash:            b.BlockHash,
+		Hash:            common.BytesToHash(b.BlockHash),
 	}, nil
 }
 

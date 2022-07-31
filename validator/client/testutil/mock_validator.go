@@ -69,6 +69,9 @@ func (fv *FakeValidator) WaitForKeymanagerInitialization(_ context.Context) erro
 	return nil
 }
 
+// LogSyncCommitteeMessagesSubmitted --
+func (fv *FakeValidator) LogSyncCommitteeMessagesSubmitted() {}
+
 // WaitForChainStart for mocking.
 func (fv *FakeValidator) WaitForChainStart(_ context.Context) error {
 	fv.WaitForChainStartCalled++
@@ -257,4 +260,9 @@ func (_ *FakeValidator) PushProposerSettings(_ context.Context, _ keymanager.IKe
 // SetPubKeyToValidatorIndexMap for mocking
 func (_ *FakeValidator) SetPubKeyToValidatorIndexMap(_ context.Context, _ keymanager.IKeymanager) error {
 	return nil
+}
+
+// SignValidatorRegistrationRequest for mocking
+func (_ *FakeValidator) SignValidatorRegistrationRequest(_ context.Context, _ iface.SigningFunc, _ *ethpb.ValidatorRegistrationV1) (*ethpb.SignedValidatorRegistrationV1, error) {
+	return nil, nil
 }

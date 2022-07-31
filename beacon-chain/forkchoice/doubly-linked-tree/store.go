@@ -110,7 +110,7 @@ func (s *Store) insert(ctx context.Context,
 	slot types.Slot,
 	root, parentRoot, payloadHash [fieldparams.RootLength]byte,
 	justifiedEpoch, finalizedEpoch types.Epoch,
-	dataAvailability forkchoice.DataAvailability) error {
+	dataAvailability forkchoice.DataAvailability) (*Node, error) {
 	_, span := trace.StartSpan(ctx, "doublyLinkedForkchoice.insert")
 	defer span.End()
 
@@ -118,8 +118,8 @@ func (s *Store) insert(ctx context.Context,
 	defer s.nodesLock.Unlock()
 
 	// Return if the block has been inserted into Store before.
-	if _, ok := s.nodeByRoot[root]; ok {
-		return nil
+	if n, ok := s.nodeByRoot[root]; ok {
+		return n, nil
 	}
 
 	parent := s.nodeByRoot[parentRoot]
@@ -143,14 +143,14 @@ func (s *Store) insert(ctx context.Context,
 			s.treeRootNode = n
 			s.headNode = n
 		} else {
-			return errInvalidParentRoot
+			return n, errInvalidParentRoot
 		}
 	} else {
 		parent.children = append(parent.children, n)
 		// Apply proposer boost
 		timeNow := uint64(time.Now().Unix())
 		if timeNow < s.genesisTime {
-			return nil
+			return n, nil
 		}
 		secondsIntoSlot := (timeNow - s.genesisTime) % params.BeaconConfig().SecondsPerSlot
 		currentSlot := slots.CurrentSlot(s.genesisTime)
@@ -164,14 +164,14 @@ func (s *Store) insert(ctx context.Context,
 		// Update best descendants
 		if err := s.treeRootNode.updateBestDescendant(ctx,
 			s.justifiedCheckpoint.Epoch, s.finalizedCheckpoint.Epoch, dataAvailability); err != nil {
-			return err
+			return n, err
 		}
 	}
 	// Update metrics.
 	processedBlockCount.Inc()
 	nodeCount.Set(float64(len(s.nodeByRoot)))
 
-	return nil
+	return n, nil
 }
 
 // pruneFinalizedNodeByRootMap prunes the `nodeByRoot` map

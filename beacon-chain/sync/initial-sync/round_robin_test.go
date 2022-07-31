@@ -284,10 +284,7 @@ func TestService_roundRobinSync(t *testing.T) {
 			genesisRoot := cache.rootCache[0]
 			cache.RUnlock()
 
-			wsb, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
-			require.NoError(t, err)
-			err = beaconDB.SaveBlock(context.Background(), wsb)
-			require.NoError(t, err)
+			util.SaveBlock(t, context.Background(), beaconDB, util.NewBeaconBlock())
 
 			st, err := util.NewBeaconState()
 			require.NoError(t, err)
@@ -329,10 +326,7 @@ func TestService_processBlock(t *testing.T) {
 	genesisBlk := util.NewBeaconBlock()
 	genesisBlkRoot, err := genesisBlk.Block.HashTreeRoot()
 	require.NoError(t, err)
-	wsb, err := wrapper.WrappedSignedBeaconBlock(genesisBlk)
-	require.NoError(t, err)
-	err = beaconDB.SaveBlock(context.Background(), wsb)
-	require.NoError(t, err)
+	util.SaveBlock(t, context.Background(), beaconDB, genesisBlk)
 	st, err := util.NewBeaconState()
 	require.NoError(t, err)
 	s := NewService(context.Background(), &Config{
@@ -400,10 +394,7 @@ func TestService_processBlockBatch(t *testing.T) {
 	genesisBlk := util.NewBeaconBlock()
 	genesisBlkRoot, err := genesisBlk.Block.HashTreeRoot()
 	require.NoError(t, err)
-	wsb, err := wrapper.WrappedSignedBeaconBlock(genesisBlk)
-	require.NoError(t, err)
-	err = beaconDB.SaveBlock(context.Background(), wsb)
-	require.NoError(t, err)
+	util.SaveBlock(t, context.Background(), beaconDB, genesisBlk)
 	st, err := util.NewBeaconState()
 	require.NoError(t, err)
 	s := NewService(context.Background(), &Config{
@@ -432,11 +423,8 @@ func TestService_processBlockBatch(t *testing.T) {
 			blk1.Block.ParentRoot = parentRoot[:]
 			blk1Root, err := blk1.Block.HashTreeRoot()
 			require.NoError(t, err)
+			util.SaveBlock(t, context.Background(), beaconDB, blk1)
 			wsb, err := wrapper.WrappedSignedBeaconBlock(blk1)
-			require.NoError(t, err)
-			err = beaconDB.SaveBlock(context.Background(), wsb)
-			require.NoError(t, err)
-			wsb, err = wrapper.WrappedSignedBeaconBlock(blk1)
 			require.NoError(t, err)
 			batch = append(batch, wsb)
 			currBlockRoot = blk1Root
@@ -450,11 +438,8 @@ func TestService_processBlockBatch(t *testing.T) {
 			blk1.Block.ParentRoot = parentRoot[:]
 			blk1Root, err := blk1.Block.HashTreeRoot()
 			require.NoError(t, err)
+			util.SaveBlock(t, context.Background(), beaconDB, blk1)
 			wsb, err := wrapper.WrappedSignedBeaconBlock(blk1)
-			require.NoError(t, err)
-			err = beaconDB.SaveBlock(context.Background(), wsb)
-			require.NoError(t, err)
-			wsb, err = wrapper.WrappedSignedBeaconBlock(blk1)
 			require.NoError(t, err)
 			batch2 = append(batch2, wsb)
 			currBlockRoot = blk1Root
@@ -538,10 +523,7 @@ func TestService_blockProviderScoring(t *testing.T) {
 	genesisRoot := cache.rootCache[0]
 	cache.RUnlock()
 
-	wsb, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
-	require.NoError(t, err)
-	err = beaconDB.SaveBlock(context.Background(), wsb)
-	require.NoError(t, err)
+	util.SaveBlock(t, context.Background(), beaconDB, util.NewBeaconBlock())
 
 	st, err := util.NewBeaconState()
 	require.NoError(t, err)
@@ -606,10 +588,7 @@ func TestService_syncToFinalizedEpoch(t *testing.T) {
 	genesisRoot := cache.rootCache[0]
 	cache.RUnlock()
 
-	wsb, err := wrapper.WrappedSignedBeaconBlock(util.NewBeaconBlock())
-	require.NoError(t, err)
-	err = beaconDB.SaveBlock(context.Background(), wsb)
-	require.NoError(t, err)
+	util.SaveBlock(t, context.Background(), beaconDB, util.NewBeaconBlock())
 
 	st, err := util.NewBeaconState()
 	require.NoError(t, err)

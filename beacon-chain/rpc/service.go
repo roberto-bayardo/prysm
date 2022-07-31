@@ -11,9 +11,10 @@ import (
 
 	middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcopentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prysmaticlabs/prysm/beacon-chain/blockchain"
+	"github.com/prysmaticlabs/prysm/beacon-chain/builder"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache"
 	"github.com/prysmaticlabs/prysm/beacon-chain/cache/depositcache"
 	blockfeed "github.com/prysmaticlabs/prysm/beacon-chain/core/feed/block"
@@ -112,6 +113,7 @@ type Config struct {
 	ExecutionEngineCaller   powchain.EngineCaller
 	ProposerIdsCache        *cache.ProposerPayloadIDsCache
 	OptimisticModeFetcher   blockchain.OptimisticModeFetcher
+	BlockBuilder            builder.BlockBuilder
 }
 
 // NewService instantiates a new RPC service instance that will
@@ -140,16 +142,16 @@ func NewService(ctx context.Context, cfg *Config) *Service {
 			recovery.StreamServerInterceptor(
 				recovery.WithRecoveryHandlerContext(tracing.RecoveryHandlerFunc),
 			),
-			grpc_prometheus.StreamServerInterceptor,
-			grpc_opentracing.StreamServerInterceptor(),
+			grpcprometheus.StreamServerInterceptor,
+			grpcopentracing.StreamServerInterceptor(),
 			s.validatorStreamConnectionInterceptor,
 		)),
 		grpc.UnaryInterceptor(middleware.ChainUnaryServer(
 			recovery.UnaryServerInterceptor(
 				recovery.WithRecoveryHandlerContext(tracing.RecoveryHandlerFunc),
 			),
-			grpc_prometheus.UnaryServerInterceptor,
-			grpc_opentracing.UnaryServerInterceptor(),
+			grpcprometheus.UnaryServerInterceptor,
+			grpcopentracing.UnaryServerInterceptor(),
 			s.validatorUnaryConnectionInterceptor,
 		)),
 		grpc.MaxRecvMsgSize(s.cfg.MaxMsgSize),
@@ -176,7 +178,7 @@ var _ stategen.CurrentSlotter = blockchain.ChainInfoFetcher(nil)
 
 // Start the gRPC server.
 func (s *Service) Start() {
-	grpc_prometheus.EnableHandlingTimeHistogram()
+	grpcprometheus.EnableHandlingTimeHistogram()
 
 	var stateCache stategen.CachedGetter
 	if s.cfg.StateGen != nil {
@@ -216,6 +218,7 @@ func (s *Service) Start() {
 		ExecutionEngineCaller:  s.cfg.ExecutionEngineCaller,
 		BeaconDB:               s.cfg.BeaconDB,
 		ProposerSlotIndexCache: s.cfg.ProposerIdsCache,
+		BlockBuilder:           s.cfg.BlockBuilder,
 	}
 	validatorServerV1 := &validator.Server{
 		HeadFetcher:           s.cfg.HeadFetcher,

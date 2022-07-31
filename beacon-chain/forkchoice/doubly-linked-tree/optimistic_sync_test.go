@@ -30,12 +30,29 @@ func TestPruneInvalid(t *testing.T) {
 		wantedRoots      [][32]byte
 		wantedErr        error
 	}{
+		{ // Bogus LVH, root not in forkchoice
+			[32]byte{'x'},
+			[32]byte{'i'},
+			[32]byte{'R'},
+			13,
+			[][32]byte{},
+			nil,
+		},
+		{
+			// Bogus LVH
+			[32]byte{'i'},
+			[32]byte{'h'},
+			[32]byte{'R'},
+			12,
+			[][32]byte{{'i'}},
+			nil,
+		},
 		{
 			[32]byte{'j'},
 			[32]byte{'b'},
 			[32]byte{'B'},
 			12,
-			[][32]byte{[32]byte{'j'}},
+			[][32]byte{{'j'}},
 			nil,
 		},
 		{
@@ -43,8 +60,8 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'b'},
 			[32]byte{'B'},
 			4,
-			[][32]byte{[32]byte{'f'}, [32]byte{'e'}, [32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'},
-				[32]byte{'k'}, [32]byte{'g'}, [32]byte{'d'}, [32]byte{'c'}},
+			[][32]byte{{'f'}, {'e'}, {'i'}, {'h'}, {'l'},
+				{'k'}, {'g'}, {'d'}, {'c'}},
 			nil,
 		},
 		{
@@ -52,7 +69,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'h'},
 			[32]byte{'H'},
 			12,
-			[][32]byte{[32]byte{'i'}},
+			[][32]byte{{'i'}},
 			nil,
 		},
 		{
@@ -60,7 +77,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'g'},
 			[32]byte{'G'},
 			11,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}},
+			[][32]byte{{'i'}, {'h'}},
 			nil,
 		},
 		{
@@ -68,7 +85,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'d'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 			nil,
 		},
 		{
@@ -76,7 +93,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'h'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 			nil,
 		},
 		{
@@ -84,7 +101,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'e'},
 			[32]byte{'D'},
 			11,
-			[][32]byte{[32]byte{'f'}, [32]byte{'e'}},
+			[][32]byte{{'f'}, {'e'}},
 			nil,
 		},
 		{
@@ -93,14 +110,14 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'C'},
 			5,
 			[][32]byte{
-				[32]byte{'f'},
-				[32]byte{'e'},
-				[32]byte{'i'},
-				[32]byte{'h'},
-				[32]byte{'l'},
-				[32]byte{'k'},
-				[32]byte{'g'},
-				[32]byte{'d'},
+				{'f'},
+				{'e'},
+				{'i'},
+				{'h'},
+				{'l'},
+				{'k'},
+				{'g'},
+				{'d'},
 			},
 			nil,
 		},
@@ -109,7 +126,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'d'},
 			[32]byte{'E'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 			nil,
 		},
 		{
@@ -117,7 +134,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'j'},
 			[32]byte{'B'},
 			12,
-			[][32]byte{[32]byte{'j'}},
+			[][32]byte{{'j'}},
 			nil,
 		},
 		{
@@ -141,7 +158,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'h'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 			nil,
 		},
 		{
@@ -149,7 +166,7 @@ func TestPruneInvalid(t *testing.T) {
 			[32]byte{'h'},
 			[32]byte{'D'},
 			8,
-			[][32]byte{[32]byte{'i'}, [32]byte{'h'}, [32]byte{'l'}, [32]byte{'k'}, [32]byte{'g'}},
+			[][32]byte{{'i'}, {'h'}, {'l'}, {'k'}, {'g'}},
 			nil,
 		},
 	}

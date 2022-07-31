@@ -319,6 +319,8 @@ func (f *blocksFetcher) fetchBlocksFromPeer(
 				// Penalize peer for hiding or sending invalid sidecars
 				f.p2p.Peers().Scorers().BadResponsesScorer().Increment(peers[i])
 			}
+		} else {
+			log.WithError(err).Debug("Could not request blocks by range")
 		}
 		log.WithFields(logrus.Fields{
 			"err":       err,
@@ -443,7 +445,11 @@ func checkBlocksForAvailableSidecars(blks []interfaces.SignedBeaconBlock, sideca
 		if blocks.IsPreEIP4844Version(b.Version()) {
 			continue
 		}
-		if blobKzgs, _ := b.Block().Body().BlobKzgs(); len(blobKzgs) == 0 {
+		blobKzgs, err := b.Block().Body().BlobKzgs()
+		if err != nil {
+			return err
+		}
+		if len(blobKzgs) == 0 {
 			continue
 		}
 		bRoot, err := b.Block().HashTreeRoot()

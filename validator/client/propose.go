@@ -27,8 +27,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type signingFunc func(context.Context, *validatorpb.SignRequest) (bls.Signature, error)
-
 const domainDataErr = "could not get domain data"
 const signingRootErr = "could not get signing root"
 const signExitErr = "could not sign voluntary exit proposal"
@@ -167,8 +165,15 @@ func (v *validator) ProposeBlock(ctx context.Context, slot types.Slot, pubKey [f
 			log.WithError(err).Error("Failed to get execution payload")
 			return
 		}
-		log = log.WithField("payloadHash", fmt.Sprintf("%#x", bytesutil.Trunc(p.BlockHash)))
-		log = log.WithField("txCount", len(p.Transactions))
+		log = log.WithFields(logrus.Fields{
+			"payloadHash": fmt.Sprintf("%#x", bytesutil.Trunc(p.BlockHash)),
+			"parentHash":  fmt.Sprintf("%#x", bytesutil.Trunc(p.ParentHash)),
+			"blockNumber": p.BlockNumber,
+			"txCount":     len(p.Transactions),
+		})
+		if p.GasLimit != 0 {
+			log = log.WithField("gasUtilized", float64(p.GasUsed)/float64(p.GasLimit))
+		}
 	}
 
 	blkRoot := fmt.Sprintf("%#x", bytesutil.Trunc(blkResp.BlockRoot))
@@ -192,7 +197,7 @@ func ProposeExit(
 	ctx context.Context,
 	validatorClient ethpb.BeaconNodeValidatorClient,
 	nodeClient ethpb.NodeClient,
-	signer signingFunc,
+	signer iface.SigningFunc,
 	pubKey []byte,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "validator.ProposeExit")
@@ -289,7 +294,7 @@ func (v *validator) signBlock(ctx context.Context, pubKey [fieldparams.BLSPubkey
 func signVoluntaryExit(
 	ctx context.Context,
 	validatorClient ethpb.BeaconNodeValidatorClient,
-	signer signingFunc,
+	signer iface.SigningFunc,
 	pubKey []byte,
 	exit *ethpb.VoluntaryExit,
 ) ([]byte, error) {

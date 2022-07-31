@@ -847,6 +847,7 @@ func (b *BeaconNode) registerRPCService() error {
 		MaxMsgSize:              maxMsgSize,
 		ProposerIdsCache:        b.proposerIdsCache,
 		ExecutionEngineCaller:   web3Service,
+		BlockBuilder:            b.fetchBuilderService(),
 	})
 
 	return b.services.RegisterService(rpcService)

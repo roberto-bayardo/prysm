@@ -57,17 +57,13 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks1(t *testing.T) {
 	r.initCaches()
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b3 := util.NewBeaconBlock()
 	b3.Block.Slot = 3
 	b3.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b3)
 	// Incomplete block link
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
@@ -81,7 +77,7 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks1(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add b2 to the cache
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b2)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b2)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b2.Block.Slot, wsb, b2Root))
 
@@ -93,9 +89,7 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks1(t *testing.T) {
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b1.Block.Slot, wsb, b1Root))
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 
 	nBlock := util.NewBeaconBlock()
 	nBlock.Block.Slot = b1.Block.Slot
@@ -137,17 +131,13 @@ func TestRegularSyncBeaconBlockSubscriber_OptimisticStatus(t *testing.T) {
 	r.initCaches()
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b3 := util.NewBeaconBlock()
 	b3.Block.Slot = 3
 	b3.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b3)
 	// Incomplete block link
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
@@ -161,7 +151,7 @@ func TestRegularSyncBeaconBlockSubscriber_OptimisticStatus(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add b2 to the cache
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b2)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b2)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b2.Block.Slot, wsb, b2Root))
 
@@ -173,9 +163,7 @@ func TestRegularSyncBeaconBlockSubscriber_OptimisticStatus(t *testing.T) {
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b1.Block.Slot, wsb, b1Root))
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 
 	nBlock := util.NewBeaconBlock()
 	nBlock.Block.Slot = b1.Block.Slot
@@ -217,17 +205,13 @@ func TestRegularSyncBeaconBlockSubscriber_ExecutionEngineTimesOut(t *testing.T) 
 	r.initCaches()
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b3 := util.NewBeaconBlock()
 	b3.Block.Slot = 3
 	b3.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b3)
 	// Incomplete block link
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
@@ -241,7 +225,7 @@ func TestRegularSyncBeaconBlockSubscriber_ExecutionEngineTimesOut(t *testing.T) 
 	require.NoError(t, err)
 
 	// Add b2 to the cache
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b2)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b2)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b2.Block.Slot, wsb, b2Root))
 
@@ -253,9 +237,7 @@ func TestRegularSyncBeaconBlockSubscriber_ExecutionEngineTimesOut(t *testing.T) 
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b1.Block.Slot, wsb, b1Root))
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 
 	nBlock := util.NewBeaconBlock()
 	nBlock.Block.Slot = b1.Block.Slot
@@ -299,9 +281,7 @@ func TestRegularSync_InsertDuplicateBlocks(t *testing.T) {
 
 	b0 := util.NewBeaconBlock()
 	b0r := [32]byte{'a'}
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b1 := util.NewBeaconBlock()
@@ -309,7 +289,7 @@ func TestRegularSync_InsertDuplicateBlocks(t *testing.T) {
 	b1.Block.ParentRoot = b0Root[:]
 	b1r := [32]byte{'b'}
 
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b0)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b0.Block.Slot, wsb, b0r))
 	require.Equal(t, 1, len(r.pendingBlocksInCache(b0.Block.Slot)), "Block was not added to map")
@@ -356,9 +336,7 @@ func TestRegularSyncBeaconBlockSubscriber_DoNotReprocessBlock(t *testing.T) {
 	r.initCaches()
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b3 := util.NewBeaconBlock()
@@ -367,12 +345,10 @@ func TestRegularSyncBeaconBlockSubscriber_DoNotReprocessBlock(t *testing.T) {
 	b3Root, err := b3.Block.HashTreeRoot()
 	require.NoError(t, err)
 
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b3)
 
 	// Add b3 to the cache
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b3)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b3.Block.Slot, wsb, b3Root))
 
@@ -431,17 +407,13 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks_2Chains(t *testin
 	p1.Peers().SetChainState(p2.PeerID(), &ethpb.Status{})
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
 	b1.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 	b1Root, err := b1.Block.HashTreeRoot()
 	require.NoError(t, err)
 
@@ -467,7 +439,7 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks_2Chains(t *testin
 	b4Root, err := b4.Block.HashTreeRoot()
 	require.NoError(t, err)
 
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b4)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b4)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b4.Block.Slot, wsb, b4Root))
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b5)
@@ -484,9 +456,7 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks_2Chains(t *testin
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b3.Block.Slot, wsb, b3Root))
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b3)
 
 	require.NoError(t, r.processPendingBlocks(context.Background())) // Marks a block as bad
 	require.NoError(t, r.processPendingBlocks(context.Background())) // Bad block removed on second run
@@ -499,9 +469,7 @@ func TestRegularSyncBeaconBlockSubscriber_ProcessPendingBlocks_2Chains(t *testin
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b2.Block.Slot, wsb, b2Root))
 
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b2)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b2)
 
 	require.NoError(t, r.processPendingBlocks(context.Background())) // Marks a block as bad
 	require.NoError(t, r.processPendingBlocks(context.Background())) // Bad block removed on second run
@@ -540,17 +508,13 @@ func TestRegularSyncBeaconBlockSubscriber_PruneOldPendingBlocks(t *testing.T) {
 	p1.Peers().SetChainState(p1.PeerID(), &ethpb.Status{})
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
 	b1.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 	b1Root, err := b1.Block.HashTreeRoot()
 	require.NoError(t, err)
 
@@ -576,7 +540,7 @@ func TestRegularSyncBeaconBlockSubscriber_PruneOldPendingBlocks(t *testing.T) {
 	b4Root, err := b4.Block.HashTreeRoot()
 	require.NoError(t, err)
 
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b2)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b2)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b2.Block.Slot, wsb, b2Root))
 	wsb, err = wrapper.WrappedSignedBeaconBlock(b3)
@@ -650,17 +614,13 @@ func TestService_BatchRootRequest(t *testing.T) {
 	p1.Peers().SetChainState(p2.PeerID(), &ethpb.Status{FinalizedEpoch: 2})
 
 	b0 := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(b0)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b0)
 	b0Root, err := b0.Block.HashTreeRoot()
 	require.NoError(t, err)
 	b1 := util.NewBeaconBlock()
 	b1.Block.Slot = 1
 	b1.Block.ParentRoot = b0Root[:]
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
-	require.NoError(t, err)
-	require.NoError(t, r.cfg.beaconDB.SaveBlock(context.Background(), wsb))
+	util.SaveBlock(t, context.Background(), r.cfg.beaconDB, b1)
 	b1Root, err := b1.Block.HashTreeRoot()
 	require.NoError(t, err)
 
@@ -770,9 +730,7 @@ func TestService_ProcessPendingBlockOnCorrectSlot(t *testing.T) {
 
 	beaconState, privKeys := util.DeterministicGenesisState(t, 100)
 	parentBlock := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(parentBlock)
-	require.NoError(t, err)
-	require.NoError(t, db.SaveBlock(ctx, wsb))
+	util.SaveBlock(t, ctx, db, parentBlock)
 	bRoot, err := parentBlock.Block.HashTreeRoot()
 	require.NoError(t, err)
 	require.NoError(t, db.SaveState(ctx, beaconState, bRoot))
@@ -809,7 +767,7 @@ func TestService_ProcessPendingBlockOnCorrectSlot(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add block1 for slot1
-	wsb, err = wrapper.WrappedSignedBeaconBlock(b1)
+	wsb, err := wrapper.WrappedSignedBeaconBlock(b1)
 	require.NoError(t, err)
 	require.NoError(t, r.insertBlockToPendingQueue(b1.Block.Slot, wsb, b1Root))
 	// Add block2 for slot2
@@ -852,9 +810,7 @@ func TestService_ProcessBadPendingBlocks(t *testing.T) {
 
 	beaconState, privKeys := util.DeterministicGenesisState(t, 100)
 	parentBlock := util.NewBeaconBlock()
-	wsb, err := wrapper.WrappedSignedBeaconBlock(parentBlock)
-	require.NoError(t, err)
-	require.NoError(t, db.SaveBlock(ctx, wsb))
+	util.SaveBlock(t, ctx, db, parentBlock)
 	bRoot, err := parentBlock.Block.HashTreeRoot()
 	require.NoError(t, err)
 	require.NoError(t, db.SaveState(ctx, beaconState, bRoot))

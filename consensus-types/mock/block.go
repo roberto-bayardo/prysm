@@ -1,7 +1,7 @@
 package mock
 
 import (
-	ssz "github.com/ferranbt/fastssz"
+	ssz "github.com/prysmaticlabs/fastssz"
 	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
 	enginev1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
@@ -204,6 +204,10 @@ func (BeaconBlockBody) ExecutionPayload() (*enginev1.ExecutionPayload, error) {
 }
 
 func (BeaconBlockBody) ExecutionPayloadHeader() (*enginev1.ExecutionPayloadHeader, error) {
+	panic("implement me")
+}
+
+func (BeaconBlockBody) BlobKzgs() ([][]byte, error) {
 	panic("implement me")
 }
 
