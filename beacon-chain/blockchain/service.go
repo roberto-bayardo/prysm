@@ -20,6 +20,7 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/helpers"
 	"github.com/prysmaticlabs/prysm/beacon-chain/core/transition"
 	"github.com/prysmaticlabs/prysm/beacon-chain/db"
+	"github.com/prysmaticlabs/prysm/beacon-chain/execution"
 	f "github.com/prysmaticlabs/prysm/beacon-chain/forkchoice"
 	doublylinkedtree "github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/doubly-linked-tree"
 	"github.com/prysmaticlabs/prysm/beacon-chain/forkchoice/protoarray"
@@ -28,7 +29,6 @@ import (
 	"github.com/prysmaticlabs/prysm/beacon-chain/operations/slashings"
 	"github.com/prysmaticlabs/prysm/beacon-chain/operations/voluntaryexits"
 	"github.com/prysmaticlabs/prysm/beacon-chain/p2p"
-	"github.com/prysmaticlabs/prysm/beacon-chain/powchain"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state"
 	"github.com/prysmaticlabs/prysm/beacon-chain/state/stategen"
 	"github.com/prysmaticlabs/prysm/cmd/beacon-chain/flags"
@@ -71,7 +71,7 @@ type Service struct {
 // config options for the service.
 type config struct {
 	BeaconBlockBuf          int
-	ChainStartFetcher       powchain.ChainStartFetcher
+	ChainStartFetcher       execution.ChainStartFetcher
 	BeaconDB                db.HeadAccessDatabase
 	DepositCache            *depositcache.DepositCache
 	ProposerSlotIndexCache  *cache.ProposerPayloadIDsCache
@@ -86,9 +86,9 @@ type config struct {
 	StateGen                *stategen.State
 	SlasherAttestationsFeed *event.Feed
 	WeakSubjectivityCheckpt *ethpb.Checkpoint
-	BlockFetcher            powchain.POWBlockFetcher
+	BlockFetcher            execution.POWBlockFetcher
 	FinalizedStateAtStartUp state.BeaconState
-	ExecutionEngineCaller   powchain.EngineCaller
+	ExecutionEngineCaller   execution.EngineCaller
 }
 
 // NewService instantiates a new block service instance that will
@@ -131,7 +131,7 @@ func (s *Service) Start() {
 			log.Fatal(err)
 		}
 	} else {
-		if err := s.startFromPOWChain(); err != nil {
+		if err := s.startFromExecutionChain(); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -351,10 +351,10 @@ func (s *Service) initializeHeadFromDB(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) startFromPOWChain() error {
+func (s *Service) startFromExecutionChain() error {
 	log.Info("Waiting to reach the validator deposit threshold to start the beacon chain...")
 	if s.cfg.ChainStartFetcher == nil {
-		return errors.New("not configured web3Service for POW chain")
+		return errors.New("not configured execution chain")
 	}
 	go func() {
 		stateChannel := make(chan *feed.Event, 1)
@@ -370,7 +370,7 @@ func (s *Service) startFromPOWChain() error {
 						return
 					}
 					log.WithField("starttime", data.StartTime).Debug("Received chain start event")
-					s.onPowchainStart(s.ctx, data.StartTime)
+					s.onExecutionChainStart(s.ctx, data.StartTime)
 					return
 				}
 			case <-s.ctx.Done():
@@ -386,9 +386,9 @@ func (s *Service) startFromPOWChain() error {
 	return nil
 }
 
-// onPowchainStart initializes a series of deposits from the ChainStart deposits in the eth1
+// onExecutionChainStart initializes a series of deposits from the ChainStart deposits in the eth1
 // deposit contract, initializes the beacon chain's state, and kicks off the beacon chain.
-func (s *Service) onPowchainStart(ctx context.Context, genesisTime time.Time) {
+func (s *Service) onExecutionChainStart(ctx context.Context, genesisTime time.Time) {
 	preGenesisState := s.cfg.ChainStartFetcher.PreGenesisState()
 	initializedState, err := s.initializeBeaconChain(ctx, genesisTime, preGenesisState, s.cfg.ChainStartFetcher.ChainStartEth1Data())
 	if err != nil {
