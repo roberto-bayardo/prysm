@@ -14,6 +14,7 @@ import (
 var (
 	_ = interfaces.SignedBeaconBlock(&eip4844SignedBeaconBlock{})
 	_ = interfaces.BeaconBlock(&eip4844BeaconBlock{})
+	_ = interfaces.BeaconBlockBody(&eip4844BeaconBlockBody{})
 )
 
 // eip4844SignedBeaconBlock is a convenience wrapper around an eip4844 beacon block
@@ -49,8 +50,8 @@ func (w eip4844SignedBeaconBlock) IsNil() bool {
 }
 
 // Copy performs a deep copy of the signed beacon block object.
-func (w eip4844SignedBeaconBlock) Copy() interfaces.SignedBeaconBlock {
-	return eip4844SignedBeaconBlock{b: w.b} // TODO(EIP-4844): Add copy method
+func (w eip4844SignedBeaconBlock) Copy() (interfaces.SignedBeaconBlock, error) {
+	return eip4844SignedBeaconBlock{b: w.b}, nil // TODO(EIP-4844): Add copy method
 }
 
 // MarshalSSZ marshals the signed beacon block to its relevant ssz form.
@@ -76,8 +77,8 @@ func (w eip4844SignedBeaconBlock) UnmarshalSSZ(buf []byte) error {
 }
 
 // Proto returns the block in its underlying protobuf interface.
-func (w eip4844SignedBeaconBlock) Proto() proto.Message {
-	return w.b
+func (w eip4844SignedBeaconBlock) Proto() (proto.Message, error) {
+	return w.b, nil
 }
 
 // PbEip4844Block returns the underlying protobuf object.
@@ -241,8 +242,8 @@ func (w eip4844BeaconBlock) UnmarshalSSZ(buf []byte) error {
 
 // Proto returns the underlying block object in its
 // proto form.
-func (w eip4844BeaconBlock) Proto() proto.Message {
-	return w.b
+func (w eip4844BeaconBlock) Proto() (proto.Message, error) {
+	return w.b, nil
 }
 
 // Version of the underlying protobuf object.
@@ -250,10 +251,10 @@ func (_ eip4844BeaconBlock) Version() int {
 	return version.EIP4844
 }
 
-func (w eip4844BeaconBlock) AsSignRequestObject() validatorpb.SignRequestObject {
+func (w eip4844BeaconBlock) AsSignRequestObject() (validatorpb.SignRequestObject, error) {
 	return &validatorpb.SignRequest_BlockV4{
 		BlockV4: w.b,
-	}
+	}, nil
 }
 
 // eip4844BeaconBlockBody is a wrapper of a beacon block body.
@@ -328,8 +329,8 @@ func (w eip4844BeaconBlockBody) HashTreeRoot() ([32]byte, error) {
 
 // Proto returns the underlying proto form of the block
 // body.
-func (w eip4844BeaconBlockBody) Proto() proto.Message {
-	return w.b
+func (w eip4844BeaconBlockBody) Proto() (proto.Message, error) {
+	return w.b, nil
 }
 
 // Execution returns the Execution payload of the block body.

@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Proto returns the underlying protobuf signed beacon block.
+// Proto converts the signed beacon block to a protobuf object.
 func (b *SignedBeaconBlock) Proto() (proto.Message, error) {
 	if b == nil {
 		return nil, errNilBlock
@@ -20,38 +20,67 @@ func (b *SignedBeaconBlock) Proto() (proto.Message, error) {
 
 	switch b.version {
 	case version.Phase0:
-		block, ok := blockMessage.(*eth.BeaconBlock)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBlockVersion)
+		var block *eth.BeaconBlock
+		if blockMessage != nil {
+			var ok bool
+			block, ok = blockMessage.(*eth.BeaconBlock)
+			if !ok {
+				return nil, errors.Wrapf(errIncorrectBlockVersion, "unable to create block from type %T", block)
+			}
 		}
 		return &eth.SignedBeaconBlock{
 			Block:     block,
 			Signature: b.signature,
 		}, nil
 	case version.Altair:
-		block, ok := blockMessage.(*eth.BeaconBlockAltair)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBlockVersion)
+		var block *eth.BeaconBlockAltair
+		if blockMessage != nil {
+			var ok bool
+			block, ok = blockMessage.(*eth.BeaconBlockAltair)
+			if !ok {
+				return nil, errors.Wrapf(errIncorrectBlockVersion, "unable to create block from type %T", block)
+			}
 		}
 		return &eth.SignedBeaconBlockAltair{
 			Block:     block,
 			Signature: b.signature,
 		}, nil
 	case version.Bellatrix:
-		block, ok := blockMessage.(*eth.BeaconBlockBellatrix)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBlockVersion)
+		var block *eth.BeaconBlockBellatrix
+		if blockMessage != nil {
+			var ok bool
+			block, ok = blockMessage.(*eth.BeaconBlockBellatrix)
+			if !ok {
+				return nil, errors.Wrapf(errIncorrectBlockVersion, "unable to create block from type %T", block)
+			}
 		}
 		return &eth.SignedBeaconBlockBellatrix{
 			Block:     block,
 			Signature: b.signature,
 		}, nil
 	case version.BellatrixBlind:
-		block, ok := blockMessage.(*eth.BlindedBeaconBlockBellatrix)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBlockVersion)
+		var block *eth.BlindedBeaconBlockBellatrix
+		if blockMessage != nil {
+			var ok bool
+			block, ok = blockMessage.(*eth.BlindedBeaconBlockBellatrix)
+			if !ok {
+				return nil, errors.Wrapf(errIncorrectBlockVersion, "unable to create block from type %T", block)
+			}
 		}
 		return &eth.SignedBlindedBeaconBlockBellatrix{
+			Block:     block,
+			Signature: b.signature,
+		}, nil
+	case version.EIP4844:
+		var block *eth.BeaconBlockWithBlobKZGs
+		if blockMessage != nil {
+			var ok bool
+			block, ok = blockMessage.(*eth.BeaconBlockWithBlobKZGs)
+			if !ok {
+				return nil, errors.Wrapf(errIncorrectBlockVersion, "unable to create block from type %T", block)
+			}
+		}
+		return &eth.SignedBeaconBlockWithBlobKZGs{
 			Block:     block,
 			Signature: b.signature,
 		}, nil
@@ -60,10 +89,10 @@ func (b *SignedBeaconBlock) Proto() (proto.Message, error) {
 	}
 }
 
-// Proto returns the underlying protobuf beacon block.
+// Proto converts the beacon block to a protobuf object.
 func (b *BeaconBlock) Proto() (proto.Message, error) {
 	if b == nil {
-		return nil, errNilBlock
+		return nil, nil
 	}
 
 	bodyMessage, err := b.body.Proto()
@@ -73,9 +102,13 @@ func (b *BeaconBlock) Proto() (proto.Message, error) {
 
 	switch b.version {
 	case version.Phase0:
-		body, ok := bodyMessage.(*eth.BeaconBlockBody)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBodyVersion)
+		var body *eth.BeaconBlockBody
+		if bodyMessage != nil {
+			var ok bool
+			body, ok = bodyMessage.(*eth.BeaconBlockBody)
+			if !ok {
+				return nil, errIncorrectBodyVersion
+			}
 		}
 		return &eth.BeaconBlock{
 			Slot:          b.slot,
@@ -85,9 +118,13 @@ func (b *BeaconBlock) Proto() (proto.Message, error) {
 			Body:          body,
 		}, nil
 	case version.Altair:
-		body, ok := bodyMessage.(*eth.BeaconBlockBodyAltair)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBodyVersion)
+		var body *eth.BeaconBlockBodyAltair
+		if bodyMessage != nil {
+			var ok bool
+			body, ok = bodyMessage.(*eth.BeaconBlockBodyAltair)
+			if !ok {
+				return nil, errIncorrectBodyVersion
+			}
 		}
 		return &eth.BeaconBlockAltair{
 			Slot:          b.slot,
@@ -97,9 +134,13 @@ func (b *BeaconBlock) Proto() (proto.Message, error) {
 			Body:          body,
 		}, nil
 	case version.Bellatrix:
-		body, ok := bodyMessage.(*eth.BeaconBlockBodyBellatrix)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBodyVersion)
+		var body *eth.BeaconBlockBodyBellatrix
+		if bodyMessage != nil {
+			var ok bool
+			body, ok = bodyMessage.(*eth.BeaconBlockBodyBellatrix)
+			if !ok {
+				return nil, errIncorrectBodyVersion
+			}
 		}
 		return &eth.BeaconBlockBellatrix{
 			Slot:          b.slot,
@@ -109,11 +150,31 @@ func (b *BeaconBlock) Proto() (proto.Message, error) {
 			Body:          body,
 		}, nil
 	case version.BellatrixBlind:
-		body, ok := bodyMessage.(*eth.BlindedBeaconBlockBodyBellatrix)
-		if !ok {
-			return nil, errors.Wrap(err, incorrectBodyVersion)
+		var body *eth.BlindedBeaconBlockBodyBellatrix
+		if bodyMessage != nil {
+			var ok bool
+			body, ok = bodyMessage.(*eth.BlindedBeaconBlockBodyBellatrix)
+			if !ok {
+				return nil, errIncorrectBodyVersion
+			}
 		}
 		return &eth.BlindedBeaconBlockBellatrix{
+			Slot:          b.slot,
+			ProposerIndex: b.proposerIndex,
+			ParentRoot:    b.parentRoot,
+			StateRoot:     b.stateRoot,
+			Body:          body,
+		}, nil
+	case version.EIP4844:
+		var body *eth.BeaconBlockBodyWithBlobKZGs
+		if bodyMessage != nil {
+			var ok bool
+			body, ok = bodyMessage.(*eth.BeaconBlockBodyWithBlobKZGs)
+			if !ok {
+				return nil, errIncorrectBodyVersion
+			}
+		}
+		return &eth.BeaconBlockWithBlobKZGs{
 			Slot:          b.slot,
 			ProposerIndex: b.proposerIndex,
 			ParentRoot:    b.parentRoot,
@@ -125,10 +186,10 @@ func (b *BeaconBlock) Proto() (proto.Message, error) {
 	}
 }
 
-// Proto returns the underlying protobuf beacon block body.
+// Proto converts the beacon block body to a protobuf object.
 func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 	if b == nil {
-		return nil, errNilBody
+		return nil, nil
 	}
 
 	switch b.version {
@@ -180,6 +241,20 @@ func (b *BeaconBlockBody) Proto() (proto.Message, error) {
 			VoluntaryExits:         b.voluntaryExits,
 			SyncAggregate:          b.syncAggregate,
 			ExecutionPayloadHeader: b.executionPayloadHeader,
+		}, nil
+	case version.EIP4844:
+		return &eth.BeaconBlockBodyWithBlobKZGs{
+			RandaoReveal:      b.randaoReveal,
+			Eth1Data:          b.eth1Data,
+			Graffiti:          b.graffiti,
+			ProposerSlashings: b.proposerSlashings,
+			AttesterSlashings: b.attesterSlashings,
+			Attestations:      b.attestations,
+			Deposits:          b.deposits,
+			VoluntaryExits:    b.voluntaryExits,
+			SyncAggregate:     b.syncAggregate,
+			ExecutionPayload:  b.executionPayload,
+			BlobKzgs:          b.blogKzgs,
 		}, nil
 	default:
 		return nil, errors.New("unsupported beacon block body version")
@@ -248,6 +323,23 @@ func initBlindedSignedBlockFromProtoBellatrix(pb *eth.SignedBlindedBeaconBlockBe
 	}
 	b := &SignedBeaconBlock{
 		version:   version.BellatrixBlind,
+		block:     block,
+		signature: pb.Signature,
+	}
+	return b, nil
+}
+
+func initSignedBlockFromProtoEIP4844(pb *eth.SignedBeaconBlockWithBlobKZGs) (*SignedBeaconBlock, error) {
+	if pb == nil {
+		return nil, errNilBlock
+	}
+
+	block, err := initBlockFromProtoEIP4844(pb.Block)
+	if err != nil {
+		return nil, err
+	}
+	b := &SignedBeaconBlock{
+		version:   version.EIP4844,
 		block:     block,
 		signature: pb.Signature,
 	}
@@ -334,9 +426,29 @@ func initBlindedBlockFromProtoBellatrix(pb *eth.BlindedBeaconBlockBellatrix) (*B
 	return b, nil
 }
 
+func initBlockFromProtoEIP4844(pb *eth.BeaconBlockWithBlobKZGs) (*BeaconBlock, error) {
+	if pb == nil {
+		return nil, errNilBlock
+	}
+
+	body, err := initBlockBodyFromProtoEIP4844(pb.Body)
+	if err != nil {
+		return nil, err
+	}
+	b := &BeaconBlock{
+		version:       version.EIP4844,
+		slot:          pb.Slot,
+		proposerIndex: pb.ProposerIndex,
+		parentRoot:    pb.ParentRoot,
+		stateRoot:     pb.StateRoot,
+		body:          body,
+	}
+	return b, nil
+}
+
 func initBlockBodyFromProtoPhase0(pb *eth.BeaconBlockBody) (*BeaconBlockBody, error) {
 	if pb == nil {
-		return nil, errNilBody
+		return nil, errNilBlockBody
 	}
 
 	b := &BeaconBlockBody{
@@ -355,7 +467,7 @@ func initBlockBodyFromProtoPhase0(pb *eth.BeaconBlockBody) (*BeaconBlockBody, er
 
 func initBlockBodyFromProtoAltair(pb *eth.BeaconBlockBodyAltair) (*BeaconBlockBody, error) {
 	if pb == nil {
-		return nil, errNilBody
+		return nil, errNilBlockBody
 	}
 
 	b := &BeaconBlockBody{
@@ -375,7 +487,7 @@ func initBlockBodyFromProtoAltair(pb *eth.BeaconBlockBodyAltair) (*BeaconBlockBo
 
 func initBlockBodyFromProtoBellatrix(pb *eth.BeaconBlockBodyBellatrix) (*BeaconBlockBody, error) {
 	if pb == nil {
-		return nil, errNilBody
+		return nil, errNilBlockBody
 	}
 
 	b := &BeaconBlockBody{
@@ -396,7 +508,7 @@ func initBlockBodyFromProtoBellatrix(pb *eth.BeaconBlockBodyBellatrix) (*BeaconB
 
 func initBlindedBlockBodyFromProtoBellatrix(pb *eth.BlindedBeaconBlockBodyBellatrix) (*BeaconBlockBody, error) {
 	if pb == nil {
-		return nil, errNilBody
+		return nil, errNilBlockBody
 	}
 
 	b := &BeaconBlockBody{
@@ -411,6 +523,28 @@ func initBlindedBlockBodyFromProtoBellatrix(pb *eth.BlindedBeaconBlockBodyBellat
 		voluntaryExits:         pb.VoluntaryExits,
 		syncAggregate:          pb.SyncAggregate,
 		executionPayloadHeader: pb.ExecutionPayloadHeader,
+	}
+	return b, nil
+}
+
+func initBlockBodyFromProtoEIP4844(pb *eth.BeaconBlockBodyWithBlobKZGs) (*BeaconBlockBody, error) {
+	if pb == nil {
+		return nil, errNilBlockBody
+	}
+
+	b := &BeaconBlockBody{
+		version:           version.EIP4844,
+		randaoReveal:      pb.RandaoReveal,
+		eth1Data:          pb.Eth1Data,
+		graffiti:          pb.Graffiti,
+		proposerSlashings: pb.ProposerSlashings,
+		attesterSlashings: pb.AttesterSlashings,
+		attestations:      pb.Attestations,
+		deposits:          pb.Deposits,
+		voluntaryExits:    pb.VoluntaryExits,
+		syncAggregate:     pb.SyncAggregate,
+		executionPayload:  pb.ExecutionPayload,
+		blogKzgs:          pb.BlobKzgs,
 	}
 	return b, nil
 }

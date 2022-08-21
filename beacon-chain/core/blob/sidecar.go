@@ -8,10 +8,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/protolambda/go-kzg/bls"
 	ssz "github.com/prysmaticlabs/fastssz"
-	"github.com/prysmaticlabs/prysm/beacon-chain/core/blocks"
+	"github.com/prysmaticlabs/prysm/consensus-types/blocks"
 	"github.com/prysmaticlabs/prysm/consensus-types/interfaces"
 	types "github.com/prysmaticlabs/prysm/consensus-types/primitives"
-	"github.com/prysmaticlabs/prysm/consensus-types/wrapper"
 	"github.com/prysmaticlabs/prysm/encoding/bytesutil"
 	v1 "github.com/prysmaticlabs/prysm/proto/engine/v1"
 	eth "github.com/prysmaticlabs/prysm/proto/prysm/v1alpha1"
@@ -119,12 +118,16 @@ func ValidateBlobsSidecar(slot types.Slot, root [32]byte, commitments [][]byte, 
 }
 
 func BlockContainsSidecar(b interfaces.SignedBeaconBlock) (bool, error) {
-	if blocks.IsPreEIP4844Version(b.Version()) {
+	hasKzg, err := BlockContainsKZGs(b.Block())
+	if err != nil {
+		return false, err
+	}
+	if !hasKzg {
 		return false, nil
 	}
-	_, err := b.SideCar()
+	_, err = b.SideCar()
 	switch {
-	case errors.Is(err, wrapper.ErrNilSidecar):
+	case errors.Is(err, blocks.ErrNilSidecar):
 		return false, nil
 	case err != nil:
 		return false, err
@@ -132,16 +135,15 @@ func BlockContainsSidecar(b interfaces.SignedBeaconBlock) (bool, error) {
 	return true, nil
 }
 
-func BlockContainsKZGs(b interfaces.BeaconBlock) bool {
+func BlockContainsKZGs(b interfaces.BeaconBlock) (bool, error) {
 	if blocks.IsPreEIP4844Version(b.Version()) {
-		return false
+		return false, nil
 	}
 	blobKzgs, err := b.Body().BlobKzgs()
 	if err != nil {
-		// cannot happen!
-		return false
+		return false, err
 	}
-	return len(blobKzgs) != 0
+	return len(blobKzgs) != 0, nil
 }
 
 // hashToBLSField implements hash_to_bls_field in the EIP-4844 spec, placing the computed field
